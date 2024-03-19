@@ -21,7 +21,7 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
 
     const dispatch = useAppDispatch()
 
-    function dragOverHander(e: React.DragEvent<HTMLDivElement>): void {
+    function dragOverHandler(e: React.DragEvent<HTMLDivElement>): void {
         e.preventDefault();
         e.currentTarget.style.boxShadow = '0px 0px 5px 0px rgba(81, 182, 223, 0.734)';
     }
@@ -59,7 +59,7 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
         <div 
             className={`${s.board} ${(number === currentDay && regularDayClass) ? s.todayClass : ''}`} 
             style={holiday ? {backgroundColor: "hsl(11deg 74.85% 81.8%)"} : {}}
-            onDragOver={dragOverHander}
+            onDragOver={dragOverHandler}
             onDrop={(e)=>dropOnBoardHandler(e, dayData)}
             onDragLeave={dragLeaveHandler}
         >
