@@ -1,0 +1,91 @@
+.header {
+    // position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+    // border-bottom: 1px solid #000;
+    background-color: var(--header-color);
+    box-shadow: 0 4px 7px var(--header-shadow);
+    box-sizing: border-box;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+}
+
+.change_buttons {
+    display: flex;
+    & .button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid var(--line-color);
+        cursor: pointer;
+        margin-right: 5px;
+        &:hover {
+            background-color: var(--card-color);
+        }
+    }
+}
+
+.month_name {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.selector {
+    height: 25px;
+    background-color: inherit;
+    outline: none;
+}
+
+.select_label {
+    margin-left: 40px;
+    display: flex;
+    align-items: center;
+
+    &>p {
+        margin-right: 10px;
+        font-weight: 700;
+    }
+    &>.selector {
+        width: 120px;
+        font-weight: 700;
+        text-transform: capitalize;
+        
+        &.all {
+            background-color: var(--line-color);
+            color: var(--black-color);
+        }
+        &.green {
+            background-color: var(--green-label);
+            color: var(--black-color);
+        }
+        &.yellow {
+            background-color: var(--yellow-label);
+            color: var(--black-color);
+        }
+        &.red {
+            background-color: var(--red-label);
+            color: var(--black-color);
+        }
+    }
+    & option {
+        text-transform: capitalize;
+        text-align: center;
+        font-weight: 700;
+        text-shadow: 0 2px 5px var(--line-color);
+    }
+}
+
+.interfaces {
+    display: flex;
+}
