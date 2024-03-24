@@ -13,6 +13,13 @@ export interface IDay {
     isCurrentMonth?: boolean
 };
 
+export interface IMonth {
+    id: string;
+    year:number;
+    month: number;
+    daysArray: IDay[];
+}
+
 export interface IResponse {
     date: string;
     localName: string;
@@ -21,6 +28,7 @@ export interface IResponse {
 export interface IState {
     yearNum: number,
     month: number,
+    isCurrentMonthInView: boolean,
     currentCard: IItem | null,
     tasksItems: Record<string, IItem>,
     tasksIds: string[],

@@ -9,6 +9,7 @@ const holidayAPI = new HolidayAPI();
 const initialState: IState = {
     yearNum: 0,
     month: 1,
+    isCurrentMonthInView: false,
     currentCard: null,
     tasksItems: {},
     tasksIds: [],
@@ -54,7 +55,6 @@ const calendarSlice = createSlice({
             if(!currentTask) {return} 
             currentTask.date = payload.date;
         },
-
         changeTask: (state, action: PayloadAction<{id: string, color: string}>) => {
             const payload = action.payload;
             const currentTask = state.tasksItems[payload.id];
@@ -69,6 +69,10 @@ const calendarSlice = createSlice({
         },
         filterByLabels: (state, action: PayloadAction<string>) => {
             state.filterWords = action.payload;
+        },
+
+        toggleInViewMonth: (state) => {
+            state.isCurrentMonthInView = !state.isCurrentMonthInView;
         },
     },
     extraReducers:(builder) => {
@@ -93,5 +97,5 @@ const calendarSlice = createSlice({
 
 const reducer = calendarSlice.reducer;
 
-export const {addNewTask, deleteTask, setCurrentCard, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
+export const {toggleInViewMonth, addNewTask, deleteTask, setCurrentCard, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
 export default reducer;

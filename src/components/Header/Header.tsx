@@ -1,11 +1,12 @@
 import React, { memo, useEffect, useState } from 'react';
 import s from './Header.module.scss';
-import { useAppDispatch } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import {filterByLabels, changeMonth, changeYear} from "../../redux/slice";
 import { HolidayAPI } from '../../services/api';
 import Download from '../Download';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import allSelectors from '../../redux/selectors';
 
 
 interface IProp {
@@ -36,8 +37,8 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
     const [label, setLabel] = useState('all');
 
     const dispatch = useAppDispatch();
-
-    
+    const storeMonth = useAppSelector(allSelectors.getMonthNum);
+    const storeYear = useAppSelector(allSelectors.getYearNum);
 
     const onChangeMonthNum = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = Number(e.target.value);
@@ -96,10 +97,10 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
                 <div className={s.button} onClick={increaseMonth}><KeyboardArrowRightIcon /></div>
             </div>
             <div className={s.select_month}>
-                    <select value={monthNum} onChange={onChangeMonthNum} className={s.selector}>
+                    <select value={storeMonth} onChange={onChangeMonthNum} className={s.selector}>
                         {months.map((month, index) => <option key={index} value={index +1}>{month}</option>)}
                     </select>
-                    <select value={yearNum} onChange={onChangeYearNum} className={s.selector}>
+                    <select value={storeYear} onChange={onChangeYearNum} className={s.selector}>
                         {arrOfYears.map((year, index) => <option key={index} value={year}>{year}</option>)}
                     </select>
             </div>
@@ -113,7 +114,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
         </div>
         
         <div className={s.month_name}>
-            {`${months[monthNum-1]} ${yearNum}`}
+            {`${months[storeMonth-1]} ${storeYear}`}
         </div>
         
         <div className={s.interfaces}>

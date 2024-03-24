@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import allSelectors from '../../redux/selectors';
 import s from './Homepage.module.scss';
-import { IDay } from "../../interfaces/interfaces";
-import Day from "../../components/Day";
+import { IDay, IMonth } from "../../interfaces/interfaces";
+import Month from "../../components/Month";
 import { nanoid } from "nanoid";
+import { InView } from "react-intersection-observer";
 
 const createDaysOfMonth = (monthNum: number, yearNum: number) => {
     const daysOfMonth: IDay[] = [];
@@ -32,21 +33,25 @@ const createDaysOfMonth = (monthNum: number, yearNum: number) => {
         };
         daysOfMonth.push(dayObject );
     }
-    daysOfMonth.push(...lastEmptyDays)
-    return daysOfMonth;
+    daysOfMonth.push(...lastEmptyDays);
+
+    return {
+        id: nanoid(),
+        year:yearNum,
+        month: monthNum,
+        daysArray: daysOfMonth
+    };
 }
 
 const Homepage: React.FC = () => {
-    const [days, setDays] = useState<IDay[]>([]);
+    const [inView, setInView] = useState(false);
+    const [months, setMonths] = useState<IMonth[]>([]);
     const weekDaysNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'San'];
 
     const currentMonth = useAppSelector(allSelectors.getMonthNum);
     const currentYear = useAppSelector(allSelectors.getYearNum);
-    
+
     const dispatch = useAppDispatch();
-
-
-    const rowCount = Math.ceil(days.length / 7);
 
     const onScrollHandler = useCallback((e: any) => {
         
@@ -55,24 +60,49 @@ const Homepage: React.FC = () => {
         }
     }, []);
 
-    
-    // useEffect(() => {
-    //     document.addEventListener('scroll', onScrollHandler);
-    //     return () => {
-    //         document.removeEventListener('scroll', onScrollHandler);
-    //     };
-    // }, [onScrollHandler]);
+    const scrollToRef = useRef<HTMLDivElement>(null);
+
+    const scrollToElement = () => {
+        scrollToRef.current?.scrollIntoView({ behavior: 'smooth' });
+        console.log('scroll run')
+      };
 
     useEffect(()=>{
-        const daysArray = [...createDaysOfMonth(currentMonth - 1, currentYear), ...createDaysOfMonth(currentMonth, currentYear), ...createDaysOfMonth(currentMonth + 1, currentYear)];
-        setDays(daysArray)
-    }, []);
+        const monthsArray: IMonth[] = [];
+        if(!months.some(item=>item.month === currentMonth && item.year === currentYear)) {
+            if(!months.some(item=>item.month === (currentMonth - 1) && item.year === currentYear)) {
+                monthsArray.push(createDaysOfMonth(currentMonth-1, currentYear))
+            }
+            if(!months.some(item=>item.month === (currentMonth+1) && item.year === currentYear)) {
+                monthsArray.push(createDaysOfMonth(currentMonth+1, currentYear))
+            }
+            monthsArray.push(createDaysOfMonth(currentMonth, currentYear));
+        } else {
+            if(!months.some(item=>item.month === (currentMonth - 1) && item.year === currentYear)) {
+                monthsArray.push(createDaysOfMonth(currentMonth-1, currentYear))
+            }
+            if(!months.some(item=>item.month === (currentMonth+1) && item.year === currentYear)) {
+                monthsArray.push(createDaysOfMonth(currentMonth+1, currentYear))
+            }
+        }
+        setMonths([...months, ...monthsArray]);
+        console.log('useeffect 1')
+    }, [currentMonth, currentYear]);
 
     useEffect(()=>{
-
-    }, [])
+        scrollToElement()
+        console.log('useeffect 2')
+    }, [months, currentMonth, currentYear])
 
     console.log('homepage render!')
+
+    const sortedMonths = [...months].sort((itemA, itemB)=>{
+        if(itemA.year - itemB.year === 0 ) {
+    
+            return itemA.month - itemB.month
+        }
+        return itemA.year - itemB.year
+    })
 
     return (
             <main className={s.mainBox}>
@@ -83,9 +113,13 @@ const Homepage: React.FC = () => {
                     </div>)}
                 </div>
                 <div className={s.wrapper} onScroll={onScrollHandler}>
-                    <div className={s.card_list}  style={{gridTemplateRows: `repeat(${rowCount}, minmax(150px, 1fr))`}}>
-                        {days && days.map(day=><Day dayData={day} key={day.key}/>)}
-                    </div> 
+                    {months.length && sortedMonths.map(month=>{
+                            if(month.month === currentMonth) {
+                                return <Month refTag={scrollToRef} monthData={month} key={month.id}/>
+                            } else {
+                                return<Month refTag={null} monthData={month} key={month.id}/> 
+                            }
+                    })} 
                 </div>
             </main>
     )

@@ -9,6 +9,7 @@ const getAllHolidays = (state: IState) => state.allHolidays;
 const getFilter = (state: IState) => state.filterWords;
 const getError = (state:IState) => state.error;
 const getLoading = (state: IState) => state.loading;
+const getCurrentMonthInView = (state: IState) => state.isCurrentMonthInView;
 
 const allSelectors = {
     getYearNum,
@@ -19,7 +20,8 @@ const allSelectors = {
     getAllHolidays,
     getFilter,
     getError,
-    getLoading
+    getLoading,
+    getCurrentMonthInView
 }
 
 export default allSelectors;
