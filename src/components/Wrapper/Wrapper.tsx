@@ -5,9 +5,7 @@ const sharedStyle: CSSProperties = {
   flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
-  textAlign: "center",
-  // background: "#148bb4",
-  color: "azure"
+  
 };
 
 type Props = {

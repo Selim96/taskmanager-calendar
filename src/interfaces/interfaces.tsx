@@ -34,7 +34,7 @@ export interface IState {
     currentCard: IItem | null,
     tasksItems: Record<string, IItem>,
     tasksIds: string[],
-    allHolidays: Array<IResponse> | null,
+    allHolidays: Record<string, IResponse>,
     filterWords: string,
     error: any,
     loading: boolean,

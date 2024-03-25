@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import React, { memo } from "react";
-import { IDay } from "../../interfaces/interfaces";
+import { IDay, IResponse } from "../../interfaces/interfaces";
 import s from './Day.module.scss';
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import allSelectors from "../../redux/selectors";
@@ -38,7 +38,8 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
     }
 
     const {key, id, number, date } = dayData;
-    const holiday = allHolidays ? allHolidays.find(item=> item.date === date) : null;
+    // const holiday = allHolidays ? allHolidays.find(item=> item.date === date) : null;
+    const holiday = allHolidays[date] ? allHolidays[date] : null;
 
     const dateFromData = new Date(date);
     const currentDate = new Date();
@@ -61,7 +62,7 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
         >
             <div className={s.board_title}>
                 <p>{number}</p>
-                {holiday && <span>{holiday?.localName}</span>}
+                {!!holiday && <span>{holiday?.localName}</span>}
             </div>
             <AddInput cardDate={date}/>
             {!!allTasksIds.length && <div className={s.list_items}>

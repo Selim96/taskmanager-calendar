@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import s from './Header.module.scss';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import {filterByLabels, changeMonth, changeYear, toggleInViewMonth} from "../../redux/slice";
@@ -7,7 +7,6 @@ import Download from '../Download';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import allSelectors from '../../redux/selectors';
-
 
 interface IProp {
     canvasRef: React.RefObject<HTMLDivElement>
@@ -25,70 +24,66 @@ const currentYear = currentDate.getFullYear();
 const currentMonthIndex = currentDate.getMonth() +1;
 
 const arrOfYears: number[] = [];
-for(let y = currentYear; y <= currentYear+20; y++) {
+for(let y = currentYear - 20; y <= currentYear+30; y++) {
     arrOfYears.push(y);
 }
 
 const holidayAPI = new HolidayAPI();
 
 const Header: React.FC<IProp> = memo(({canvasRef}) => {
-    const [yearNum, setYearNum] = useState<number>(currentYear);
-    const [monthNum, setMonthNum] = useState<number>(currentMonthIndex); // 1-12
-    const [label, setLabel] = useState('all');
-
-    const dispatch = useAppDispatch();
+    
     const storeMonth = useAppSelector(allSelectors.getMonthNum);
     const storeYear = useAppSelector(allSelectors.getYearNum);
     const filterValue = useAppSelector(allSelectors.getFilter);
+    const allHolidays = useAppSelector(allSelectors.getAllHolidays);
+    const dispatch = useAppDispatch();
 
     const onChangeMonthNum = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = Number(e.target.value);
-        setMonthNum(value);
+        dispatch(toggleInViewMonth(false));
+        dispatch(changeMonth({year: storeYear, month:value}));
     }
     const onChangeYearNum = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = Number(e.target.value);
-        setYearNum(value);
+        dispatch(toggleInViewMonth(false));
+        dispatch(changeYear(value));
     }
-
     const onChangeLabel = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
-        setLabel(value);
+        dispatch(filterByLabels(value));
     }
 
     const increaseMonth = () => {
-        if(monthNum === 12) {
-            setMonthNum(1);
-            setYearNum(yearNum + 1);
+        if(storeMonth === 12) {
+            dispatch(changeMonth({year: storeYear + 1, month:1}));
             return;
         };
-        setMonthNum(monthNum +1);
+        dispatch(changeMonth({year: storeYear , month:storeMonth+1}));
     }
     const decreaseMonth = () => {
-        if(monthNum === 1) {
-            setMonthNum(12);
-            setYearNum(yearNum - 1);
+        if(storeMonth === 1) {
+            dispatch(changeMonth({year: storeYear - 1, month:12}));
             return
         };
-        setMonthNum(monthNum -1);
+        dispatch(changeMonth({year: storeYear, month:storeMonth - 1}));
     }
 
-    useEffect(()=>{
-        dispatch(holidayAPI.getPublicHolidays(yearNum));
+    useEffect(()=> {
+        dispatch(changeYear(currentYear));
+        dispatch(changeMonth({year: currentYear, month:currentMonthIndex}));
+        dispatch(filterByLabels('all'));
     }, []);
 
-    useEffect(()=> {
-            dispatch(changeYear(yearNum));
-            // dispatch(changeMonth(monthNum));
-    }, [yearNum]);
-
-    useEffect(()=> {
-        dispatch(toggleInViewMonth(false));
-        dispatch(changeMonth(monthNum));
-    }, [monthNum, yearNum]);
+    const refConst = useRef(true)
 
     useEffect(()=>{
-        dispatch(filterByLabels(label));
-    }, [label]);
+        if (refConst.current) {
+            dispatch(holidayAPI.getPublicHolidays(currentYear));
+            refConst.current = false;
+        } else if(allHolidays && !Object.keys(allHolidays).some(item=>item.includes(storeYear.toString()))) {
+            dispatch(holidayAPI.getPublicHolidays(storeYear));
+        }
+    }, [storeYear]);
 
     return <header className={s.header}>
         <div className={s.navigation}>
@@ -107,7 +102,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
             </div>
             <div className={s.select_label}>
                 <p>Label</p>
-                    <select value={filterValue} onChange={onChangeLabel} className={`${s.selector} ${s[label]}`} >
+                    <select value={filterValue} onChange={onChangeLabel} className={`${s.selector} ${s[filterValue]}`} >
                         {labels.map((lb, index) => 
                             <option key={index} value={lb} className={s[lb]}>{lb}</option>)}
                     </select>

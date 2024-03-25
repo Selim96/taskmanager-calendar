@@ -15,8 +15,8 @@ const initialState: IState = {
     currentCard: null,
     tasksItems: {},
     tasksIds: [],
-    allHolidays: null,
-    filterWords: '',
+    allHolidays: {},
+    filterWords: 'all',
     error: null,
     loading: false,
 }
@@ -50,16 +50,24 @@ const calendarSlice = createSlice({
                 state.monthsArray = creteYear(payload)
             }
         },
-        changeMonth: (state , action: PayloadAction<number>) => {
-            const payload = action.payload;
-            const months= state.monthsArray;
-            state.month = payload
+        changeMonth: (state , action: PayloadAction<{year: number, month:number}>) => {
+            const {year, month} = action.payload;
+            const monthsState= state.monthsArray;
+            state.month = month;
+            if(state.yearNum !== year) state.yearNum = year;
 
-            if(payload === 1 ) {
-                changeYear(state.yearNum - 1)
+            if(month === 1 ) {
+                console.log('payload 1')
+                if(monthsState.some(item=>item.year===state.yearNum-1)) {return}
+                const index = monthsState.findIndex(item=>item.year === year && item.month === month)
+                monthsState.splice(index, 0, ...creteYear(state.yearNum-1));
+               
             }
-            if(payload === 12 ) {
-                changeYear(state.yearNum + 1)
+            if(month === 12 ) {
+                console.log('payload 12')
+                if(monthsState.some(item=>item.year===state.yearNum+1)) {return}
+                const index = monthsState.findIndex(item=>item.year === year && item.month === month)
+                monthsState.splice(index+1, 0, ...creteYear(state.yearNum+1));
             }
            
             // if(!months.some(item=>item.month === payload && item.year === state.yearNum)) {
@@ -131,7 +139,13 @@ const calendarSlice = createSlice({
         });
         builder.addCase(holidayAPI.getPublicHolidays.fulfilled, (state: IState, action: PayloadAction<IResponse[]>) => {
             state.loading = false;
-            state.allHolidays = action.payload;
+            console.log(action.payload)
+            
+            action.payload.forEach((item)=>{
+                const {localName, date} = item;
+                state.allHolidays = {...state.allHolidays, [date.toString()]: item}
+            })
+            // state.allHolidays = action.payload;
         });
         builder.addCase(holidayAPI.getPublicHolidays.rejected, (state, { payload }) => {
             state.loading = false;
