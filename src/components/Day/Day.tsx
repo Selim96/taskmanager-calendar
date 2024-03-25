@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import React, { memo } from "react";
-import { IDay, IItem } from "../../interfaces/interfaces";
+import { IDay } from "../../interfaces/interfaces";
 import s from './Day.module.scss';
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import allSelectors from "../../redux/selectors";
@@ -16,7 +16,6 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
     const allHolidays = useAppSelector(allSelectors.getAllHolidays);
     const allTasks = useAppSelector(allSelectors.getTasks);
     const allTasksIds=useAppSelector(allSelectors.getTasksIds);
-    const currentMonth = useAppSelector(allSelectors.getMonthNum);
     const currentCard = useAppSelector(allSelectors.getCurrentCard);
 
     const dispatch = useAppDispatch()
@@ -39,25 +38,22 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
     }
 
     const {key, id, number, date } = dayData;
-    
+    const holiday = allHolidays ? allHolidays.find(item=> item.date === date) : null;
+
+    const dateFromData = new Date(date);
+    const currentDate = new Date();
+
+    console.log('day render!')
+
     if(id === 0) {
         return (
             <div key={nanoid()} className={`${s.board} ${s.empty_board} `}></div>
         )
     }
 
-    const holiday = allHolidays ? allHolidays.find(item=> item.date === date) : null;
-
-    const currentDate = new Date();
-    const currentMonthIndex = currentDate.getMonth() +1;
-    const currentDay = currentDate.getDate();
-    const regularDayClass = currentMonthIndex === currentMonth;
-
-    console.log('day render!')
-
     return (
         <div 
-            className={`${s.board} ${(number === currentDay && regularDayClass) ? s.todayClass : ''}`} 
+            className={`${s.board} ${(currentDate.toDateString() === dateFromData.toDateString()) ? s.todayClass : ''}`} 
             style={holiday ? {backgroundColor: "hsl(11deg 74.85% 81.8%)"} : {}}
             onDragOver={dragOverHandler}
             onDrop={(e)=>dropOnBoardHandler(e, dayData)}

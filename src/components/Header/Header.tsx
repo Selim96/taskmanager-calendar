@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import s from './Header.module.scss';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import {filterByLabels, changeMonth, changeYear} from "../../redux/slice";
+import {filterByLabels, changeMonth, changeYear, toggleInViewMonth} from "../../redux/slice";
 import { HolidayAPI } from '../../services/api';
 import Download from '../Download';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -39,6 +39,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
     const dispatch = useAppDispatch();
     const storeMonth = useAppSelector(allSelectors.getMonthNum);
     const storeYear = useAppSelector(allSelectors.getYearNum);
+    const filterValue = useAppSelector(allSelectors.getFilter);
 
     const onChangeMonthNum = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = Number(e.target.value);
@@ -77,13 +78,13 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
 
     useEffect(()=> {
             dispatch(changeYear(yearNum));
-            
-            dispatch(changeMonth(monthNum));
+            // dispatch(changeMonth(monthNum));
     }, [yearNum]);
 
     useEffect(()=> {
+        dispatch(toggleInViewMonth(false));
         dispatch(changeMonth(monthNum));
-    }, [monthNum]);
+    }, [monthNum, yearNum]);
 
     useEffect(()=>{
         dispatch(filterByLabels(label));
@@ -106,7 +107,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
             </div>
             <div className={s.select_label}>
                 <p>Label</p>
-                    <select value={label} onChange={onChangeLabel} className={`${s.selector} ${s[label]}`} >
+                    <select value={filterValue} onChange={onChangeLabel} className={`${s.selector} ${s[label]}`} >
                         {labels.map((lb, index) => 
                             <option key={index} value={lb} className={s[lb]}>{lb}</option>)}
                     </select>

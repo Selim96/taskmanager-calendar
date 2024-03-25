@@ -15,6 +15,7 @@ export interface IDay {
 
 export interface IMonth {
     id: string;
+    number: number;
     year:number;
     month: number;
     daysArray: IDay[];
@@ -26,6 +27,7 @@ export interface IResponse {
 }
 
 export interface IState {
+    monthsArray: IMonth[],
     yearNum: number,
     month: number,
     isCurrentMonthInView: boolean,
