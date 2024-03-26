@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { IMonth } from "../../interfaces/interfaces";
 import Wrapper from "../Wrapper";
 import s from './Month.module.scss';
@@ -9,14 +9,17 @@ import { changeMonth, toggleInViewMonth } from "../../redux/slice";
 import allSelectors from "../../redux/selectors";
 
 interface IProp {
-    monthData: IMonth,
+    monthId: number,
 }
 
-const Month:React.FC<IProp> = ({monthData}) => {
-    const {year, month, daysArray, number, id} = monthData;
+const Month:React.FC<IProp> = memo(({monthId}) => {
+    
+    const monthData = useAppSelector(allSelectors.getMonthArray)[monthId];
     const inViewMonthStatus = useAppSelector(allSelectors.getCurrentMonthInView);
     const currentMonth = useAppSelector(allSelectors.getMonthNum);
     const currentYear = useAppSelector(allSelectors.getYearNum); 
+
+    const {year, month, daysArray, number, id} = monthData;
 
     const dispatch = useAppDispatch();
 
@@ -35,11 +38,6 @@ const Month:React.FC<IProp> = ({monthData}) => {
         if(currentNumber === number )
         scrollToElement()
     }, [currentMonth, currentYear])
-
-    // useEffect(()=> {
-    //     if(inViewMonthStatus)
-    //     dispatch(changeMonth(month))
-    // }, [inViewMonthStatus])
 
     return (
         <InView onChange={(inView, entry)=>{console.log('InView', inView); 
@@ -61,6 +59,6 @@ const Month:React.FC<IProp> = ({monthData}) => {
         </InView>
     )
     
-}
+})
 
 export default Month;

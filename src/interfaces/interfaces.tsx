@@ -27,7 +27,8 @@ export interface IResponse {
 }
 
 export interface IState {
-    monthsArray: IMonth[],
+    monthsArray: Record<number, IMonth>,
+    monthsIds: number[],
     yearNum: number,
     month: number,
     isCurrentMonthInView: boolean,

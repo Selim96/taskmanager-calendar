@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction  } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import  {IState, IItem, IResponse} from "../interfaces/interfaces";
+import  {IState, IItem, IResponse, IMonth} from "../interfaces/interfaces";
 import { HolidayAPI } from "../services/api";
 import { createDaysOfMonth } from "../helpers";
-
 
 const holidayAPI = new HolidayAPI();
 
 const initialState: IState = {
-    monthsArray:[],
+    monthsArray:{},
+    monthsIds: [],
     yearNum: 0,
     month: 1,
     isCurrentMonthInView: false,
@@ -28,11 +28,16 @@ function getDayNum(holiday: string) {
 }
 
 function creteYear(yearNum: number) {
-    const array = []
+    let fullYear: Record<number, IMonth> = {};
+    const ids: number[] = [];
     for(let i=1; i <= 12; i++) {
-        array.push(createDaysOfMonth(i, yearNum))
+        const yearString = yearNum.toString();
+        const monthString = i.toString().padStart(2, '0');
+        const recordNum = Number(yearString+monthString)
+        fullYear = {...fullYear, [recordNum]: createDaysOfMonth(i, yearNum)}
+        ids.push(recordNum);
     }
-    return array;
+    return {fullYear, ids};
 }
 
 const calendarSlice = createSlice({
@@ -43,11 +48,21 @@ const calendarSlice = createSlice({
             const payload = action.payload;
             state.yearNum = payload;
             if(state.monthsArray) {
-                if(state.monthsArray.some(item=>item.year===payload)) {return}
-                const index = state.monthsArray.findIndex((item)=>item.number>payload*100)
-                state.monthsArray.splice(index, 0, ...creteYear(payload));
+                if(Object.keys(state.monthsArray).some(item=> Math.round(Number(item) / 100) === payload)) {return}
+                const {fullYear, ids} = creteYear(payload);
+                state.monthsArray = {...state.monthsArray, ...fullYear};
+                const index1 = state.monthsIds.findIndex((item)=>payload*100 - item < 0)
+                const index2 = state.monthsIds.findIndex((item)=>item - payload*100 > 0)
+                console.log(index2)
+                if(index2 === -1) {
+                    state.monthsIds.push(...ids);
+                } else {
+                    state.monthsIds.splice(Math.max(index1, index2), 0, ...ids);
+                }
             } else {
-                state.monthsArray = creteYear(payload)
+                const {fullYear, ids} = creteYear(payload);
+                state.monthsArray = {...fullYear};
+                state.monthsIds = [...ids];
             }
         },
         changeMonth: (state , action: PayloadAction<{year: number, month:number}>) => {
@@ -58,40 +73,24 @@ const calendarSlice = createSlice({
 
             if(month === 1 ) {
                 console.log('payload 1')
-                if(monthsState.some(item=>item.year===state.yearNum-1)) {return}
-                const index = monthsState.findIndex(item=>item.year === year && item.month === month)
-                monthsState.splice(index, 0, ...creteYear(state.yearNum-1));
-               
+                if(state.monthsIds.some(item=>Math.round(item/100)=== year - 1)) {return};
+                const {fullYear, ids} = creteYear(state.yearNum-1);
+                state.monthsArray = {...state.monthsArray, ...fullYear};
+                const index = state.monthsIds.findIndex((item)=>item>(state.yearNum-1)*100);
+                state.monthsIds.splice(index, 0, ...ids);
             }
             if(month === 12 ) {
                 console.log('payload 12')
-                if(monthsState.some(item=>item.year===state.yearNum+1)) {return}
-                const index = monthsState.findIndex(item=>item.year === year && item.month === month)
-                monthsState.splice(index+1, 0, ...creteYear(state.yearNum+1));
+                if(state.monthsIds.some(item=>Math.round(item/100)=== year + 1)) {return};
+                const {fullYear, ids} = creteYear(state.yearNum+1);
+                state.monthsArray = {...state.monthsArray, ...fullYear};
+                const index = state.monthsIds.indexOf(state.yearNum*100+12)+1;
+                state.monthsIds.splice(index, 0, ...ids);
+
+                // if(monthsState.some(item=>item.year===state.yearNum+1)) {return}
+                // const index = monthsState.findIndex(item=>item.year === year && item.month === month)
+                // monthsState.splice(index+1, 0, ...creteYear(state.yearNum+1));
             }
-           
-            // if(!months.some(item=>item.month === payload && item.year === state.yearNum)) {
-            //     if(!months.some((item)=>item.month === (payload - 1) && item.year === state.yearNum)) {
-            //         const index = months.reduce((prev, item, index, array) => {
-            //             if(item.year === state.yearNum) {
-            //                 if(item.month < payload-1) {prev = index}
-            //             } else if(item.year < state.yearNum) {prev = index}
-            //             return prev
-            //         }, 0);
-            //         months.splice(index, 0, createDaysOfMonth(payload-1, state.yearNum))
-            //     }
-            //     if(!months.some(item=>item.month === (payload+1) && item.year === state.yearNum)) {
-            //         months.push(createDaysOfMonth(payload+1, state.yearNum))
-            //     }
-            //     months.push(createDaysOfMonth(payload, state.yearNum));
-            // } else {
-            //     if(!months.some(item=>item.month === (payload - 1) && item.year === state.yearNum)) {
-            //         months.push(createDaysOfMonth(payload-1, state.yearNum))
-            //     }
-            //     if(!months.some(item=>item.month === (payload+1) && item.year === state.yearNum)) {
-            //         months.push(createDaysOfMonth(payload+1, state.yearNum))
-            //     }
-            // }
         },
         setCurrentCard: (state , action: PayloadAction<IItem | null>) => {
             state.currentCard = action.payload;
@@ -139,13 +138,10 @@ const calendarSlice = createSlice({
         });
         builder.addCase(holidayAPI.getPublicHolidays.fulfilled, (state: IState, action: PayloadAction<IResponse[]>) => {
             state.loading = false;
-            console.log(action.payload)
-            
             action.payload.forEach((item)=>{
-                const {localName, date} = item;
+                const {date} = item;
                 state.allHolidays = {...state.allHolidays, [date.toString()]: item}
             })
-            // state.allHolidays = action.payload;
         });
         builder.addCase(holidayAPI.getPublicHolidays.rejected, (state, { payload }) => {
             state.loading = false;
