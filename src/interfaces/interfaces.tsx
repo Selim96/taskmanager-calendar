@@ -32,11 +32,11 @@ export interface IState {
     yearNum: number,
     month: number,
     isCurrentMonthInView: boolean,
-    currentCard: IItem | null,
     tasksItems: Record<string, IItem>,
     tasksIds: string[],
     allHolidays: Record<string, IResponse>,
     filterWords: string,
+    lable: string,
     error: any,
     loading: boolean,
 };

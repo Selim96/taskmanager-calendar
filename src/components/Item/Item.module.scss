@@ -1,19 +1,33 @@
 .item {
     width: 100%;
-    min-height: 30px;
-    padding: 2px;
+    min-height: 40px;
+    padding: 4px;
     border-radius: 2px;
-    margin: 2px 0;
+    margin: 5px 0;
     cursor: grab;
     background-color: var(--item-back-color);
     font-size: 12px;
     position: relative;
-    padding-right: 20px;
+    // padding-right: 20px;
 
-    & .delete_icon {
-        position: absolute;
-        right: 0;
-        top: 0;
+    &_content {
+        display: flex;
+
+    }
+
+    & .item_title {
+        flex-grow: 2;
+        text-transform: capitalize;
+    }
+}
+
+.icons_thumb {
+    display: flex;
+    align-items: center;
+    & .edit_icon {
+
+    }
+    & .icons {
         background-color: inherit;
         cursor: pointer;
         height: 100%;
@@ -27,9 +41,8 @@
             }
         }
     }
-
-    & .item_title {
-        text-transform: capitalize;
+    &:hover {
+        transform: scale(1.3);
     }
 }
 

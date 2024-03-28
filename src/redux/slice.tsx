@@ -12,11 +12,11 @@ const initialState: IState = {
     yearNum: 0,
     month: 1,
     isCurrentMonthInView: false,
-    currentCard: null,
     tasksItems: {},
     tasksIds: [],
     allHolidays: {},
     filterWords: 'all',
+    lable: 'all',
     error: null,
     loading: false,
 }
@@ -67,7 +67,6 @@ const calendarSlice = createSlice({
         },
         changeMonth: (state , action: PayloadAction<{year: number, month:number}>) => {
             const {year, month} = action.payload;
-            const monthsState= state.monthsArray;
             state.month = month;
             if(state.yearNum !== year) state.yearNum = year;
 
@@ -92,9 +91,6 @@ const calendarSlice = createSlice({
                 // monthsState.splice(index+1, 0, ...creteYear(state.yearNum+1));
             }
         },
-        setCurrentCard: (state , action: PayloadAction<IItem | null>) => {
-            state.currentCard = action.payload;
-        },
         addNewTask: (state, action: PayloadAction<IItem>) => {
             const data = action.payload;
             state.tasksIds.push(data.id);
@@ -111,22 +107,27 @@ const calendarSlice = createSlice({
             if(!currentTask) {return} 
             currentTask.date = payload.date;
         },
-        changeTask: (state, action: PayloadAction<{id: string, color: string}>) => {
+        changeTask: (state, action: PayloadAction<{id: string, color: string, text?: string}>) => {
             const payload = action.payload;
             const currentTask = state.tasksItems[payload.id];
             if(!currentTask) {return}
-            if(!currentTask?.labels.includes(action.payload.color)) {
-               currentTask?.labels.push(action.payload.color); 
+            if(!payload.text) {
+                if(!currentTask?.labels.includes(payload.color)) {
+                    currentTask.labels = [...currentTask?.labels, payload.color];
+                 } else {
+                     const index = currentTask?.labels.indexOf(payload.color);
+                     currentTask?.labels.splice(index, 1)
+                 }
             } else {
-                const index = currentTask?.labels.indexOf(action.payload.color);
-                currentTask?.labels.splice(index, 1)
+                currentTask.title = payload.text;
             }
-            
         },
         filterByLabels: (state, action: PayloadAction<string>) => {
+            state.lable = action.payload;
+        },
+        filterByWord: (state, action: PayloadAction<string>) => {
             state.filterWords = action.payload;
         },
-
         toggleInViewMonth: (state, action:PayloadAction<boolean> ) => {
             state.isCurrentMonthInView = action.payload;
         },
@@ -156,5 +157,5 @@ const calendarSlice = createSlice({
 
 const reducer = calendarSlice.reducer;
 
-export const {toggleInViewMonth, addNewTask, deleteTask, setCurrentCard, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
+export const {filterByWord, toggleInViewMonth, addNewTask, deleteTask, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
 export default reducer;

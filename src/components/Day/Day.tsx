@@ -1,45 +1,26 @@
 import { nanoid } from "nanoid";
 import React, { memo } from "react";
-import { IDay, IResponse } from "../../interfaces/interfaces";
+import { IDay, IItem } from "../../interfaces/interfaces";
 import s from './Day.module.scss';
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 import allSelectors from "../../redux/selectors";
-import { replaceTask, setCurrentCard } from "../../redux/slice";
 import AddInput from "../AddInput";
 import Item from "../Item";
 
 interface IProps {
+    tasks?: IItem[],
+    dragStartHandler: (e: React.DragEvent<HTMLDivElement>, task: IItem) => void,
+    dropOnBoardHandler: (e: React.DragEvent<HTMLDivElement>, day: IDay) => void,
+    dragOverHandler: (e: React.DragEvent<HTMLDivElement>)=> void,
+    dragLeaveHandler: (e:React.DragEvent<HTMLDivElement>)=>void,
     dayData: IDay
 }
 
-const Day:React.FC<IProps> = memo(({dayData})=> {
+const Day:React.FC<IProps> = memo(({dayData, tasks, dragStartHandler, dropOnBoardHandler, dragOverHandler, dragLeaveHandler})=> {
     const allHolidays = useAppSelector(allSelectors.getAllHolidays);
-    const allTasks = useAppSelector(allSelectors.getTasks);
-    const allTasksIds=useAppSelector(allSelectors.getTasksIds);
-    const currentCard = useAppSelector(allSelectors.getCurrentCard);
-
-    const dispatch = useAppDispatch()
-
-    function dragOverHandler(e: React.DragEvent<HTMLDivElement>): void {
-        e.preventDefault();
-        e.currentTarget.style.boxShadow = '0px 0px 5px 0px rgba(81, 182, 223, 0.734)';
-    }
-    function dragLeaveHandler(e:React.DragEvent<HTMLDivElement>) {
-        e.currentTarget.style.boxShadow = 'none';
-    }
-    function dropOnBoardHandler(e:React.DragEvent<HTMLDivElement>, day: IDay) {
-        if(currentCard) {
-            const date = day.date;
-            dispatch(replaceTask({id: currentCard.id, date}));
-            dispatch(setCurrentCard(null));
-        }
-        e.currentTarget.style.scale = '1';
-        e.currentTarget.style.boxShadow = 'none';
-    }
 
     const {key, id, number, date } = dayData;
-    // const holiday = allHolidays ? allHolidays.find(item=> item.date === date) : null;
-    const holiday = allHolidays[date] ? allHolidays[date] : null;
+    const holiday = !!allHolidays[date] ? allHolidays[date] : null;
 
     const dateFromData = new Date(date);
     const currentDate = new Date();
@@ -65,14 +46,22 @@ const Day:React.FC<IProps> = memo(({dayData})=> {
                 {!!holiday && <span>{holiday?.localName}</span>}
             </div>
             <AddInput cardDate={date}/>
-            {!!allTasksIds.length && <div className={s.list_items}>
-                {allTasksIds.map(itemId=> {
-                    if(allTasks[itemId].date === date) {
-                        return <Item key={itemId} itemId={itemId}/>
-                    }
+            {!!tasks && 
+            <div className={s.list_items}>
+                {tasks.map(item=> {
+                    return <Item dragStartHandler={dragStartHandler} key={item.id} itemId={item.id}/>
                 })}
             </div>}
         </div>)
 })
 
 export default Day;
+
+// {!!allTasksIds.length && 
+//     <div className={s.list_items}>
+//         {allTasksIds.map(itemId=> {
+//             if(allTasks[itemId].date === date) {
+//                 return <Item dragStartHandler={dragStartHandler} key={itemId} itemId={itemId}/>
+//             }
+//         })}
+//     </div>}

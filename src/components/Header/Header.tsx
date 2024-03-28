@@ -34,7 +34,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
     
     const storeMonth = useAppSelector(allSelectors.getMonthNum);
     const storeYear = useAppSelector(allSelectors.getYearNum);
-    const filterValue = useAppSelector(allSelectors.getFilter);
+    const filterValue = useAppSelector(allSelectors.getLable);
     const allHolidays = useAppSelector(allSelectors.getAllHolidays);
     const dispatch = useAppDispatch();
 
