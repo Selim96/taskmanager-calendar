@@ -87,7 +87,7 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
             className="inview_elem">
                     {({ ref, inView }) => 
                     (<Wrapper ref={ref}>
-                            <div id={number.toString()} ref={scrollToRef} className={[s.card_list].join(' ')}  style={{gridTemplateRows: `repeat(${rowCount}, minmax(140px, 160px))`}}>
+                            <div id={number.toString()} ref={scrollToRef} className={[s.card_list].join(' ')}  style={{gridTemplateRows: `repeat(${rowCount}, minmax(150px, 150px))`, height: `${rowCount *150 + (rowCount-1)*4 +8}px`}}>
                                 {daysArray.map(day=>{
                                     if(tasksValues.some(item=>item.date === day.date)) {
                                         const tasks = taskIds.reduce((total: IItem[],item)=>{
