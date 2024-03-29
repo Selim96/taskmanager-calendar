@@ -17,6 +17,7 @@ const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
     const dispatch= useAppDispatch();
     const task = useAppSelector((state: IState) => state.tasksItems[itemId]);
     const filterByLabels = useAppSelector(allSelectors.getLable);
+    const filterByWords = useAppSelector(allSelectors.getFilter);
     const [title, setTitle] = useState<string>(task.title);
     const [isActiveInput, setIsActiveInput] = useState(false);
 
@@ -75,6 +76,13 @@ const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
 
     if(filterByLabels === 'all') isShownItem= true;
     if(task.labels.includes(filterByLabels)) isShownItem= true;
+    if(filterByWords){
+        if(task.title.includes(filterByWords)) {
+            isShownItem= true; console.log('filtering')
+        } else {
+            isShownItem= false
+        }
+    }
 
     console.log('item render!')
 

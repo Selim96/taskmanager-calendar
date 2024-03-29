@@ -7,6 +7,7 @@ import Download from '../Download';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import allSelectors from '../../redux/selectors';
+import Filter from '../Filter';
 
 interface IProp {
     canvasRef: React.RefObject<HTMLDivElement>
@@ -107,6 +108,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
                             <option key={index} value={lb} className={s[lb]}>{lb}</option>)}
                     </select>
             </div>
+            <Filter/>
         </div>
         
         <div className={s.month_name}>
