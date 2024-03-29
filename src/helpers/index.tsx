@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { IDay } from "../interfaces/interfaces";
+import { IDay, IMonth } from "../interfaces/interfaces";
 
 
 export const createDaysOfMonth = (monthNum: number, yearNum: number) => {
@@ -40,4 +40,17 @@ export const createDaysOfMonth = (monthNum: number, yearNum: number) => {
         month: monthNum,
         daysArray: daysOfMonth
     };
+}
+
+export function creteYear(yearNum: number) {
+    let fullYear: Record<number, IMonth> = {};
+    const ids: number[] = [];
+    for(let i=1; i <= 12; i++) {
+        const yearString = yearNum.toString();
+        const monthString = i.toString().padStart(2, '0');
+        const recordNum = Number(yearString+monthString)
+        fullYear = {...fullYear, [recordNum]: createDaysOfMonth(i, yearNum)}
+        ids.push(recordNum);
+    }
+    return {fullYear, ids};
 }

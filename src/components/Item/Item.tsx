@@ -9,10 +9,11 @@ import allSelectors from "../../redux/selectors";
 
 interface IInterface {
     itemId: string, 
-    dragStartHandler: (e: React.DragEvent<HTMLDivElement>, task: IItem) => void
+    dragStartHandler: (e: React.DragEvent<HTMLDivElement>, task: IItem) => void,
+    dragOverHanderItem: (e: React.DragEvent<HTMLDivElement>, itemId: string) => void
 }
 
-const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
+const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler, dragOverHanderItem})=>{
     
     const dispatch= useAppDispatch();
     const task = useAppSelector((state: IState) => state.tasksItems[itemId]);
@@ -48,10 +49,6 @@ const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
         e.currentTarget.style.boxShadow = 'none';
     }, [])
 
-    const dragOverHanderItem=useCallback((e: React.DragEvent<HTMLDivElement>)=> {
-        e.preventDefault();
-        e.currentTarget.style.boxShadow = '0px 6px 5px 0px rgba(0,0,0,0.56)';
-    }, [])
     const dragLeaveHandler=useCallback((e:React.DragEvent<HTMLDivElement>)=> {
         e.currentTarget.style.boxShadow = 'none';
     }, [])
@@ -59,7 +56,7 @@ const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
     const dropHandler= useCallback((e: React.DragEvent<HTMLDivElement>)=> {
         e.preventDefault();
         e.currentTarget.style.boxShadow = 'none';
-    },[ ])
+    },[])
 
     const onLabelClick = useCallback((color: string) => {
         dispatch(changeTask({id:itemId, color}));
@@ -78,17 +75,15 @@ const Item: React.FC<IInterface> =memo(({itemId, dragStartHandler})=>{
     if(task.labels.includes(filterByLabels)) isShownItem= true;
     if(filterByWords){
         if(task.title.includes(filterByWords)) {
-            isShownItem= true; console.log('filtering')
+            isShownItem= true;
         } else {
             isShownItem= false
         }
     }
 
-    console.log('item render!')
-
     return (
         <div id={`${task.id}`} className={s.item} style={isShownItem ? {display: 'block'} : {display: 'none'}}
-            onDragOver={dragOverHanderItem}
+            onDragOver={(e)=>dragOverHanderItem(e, itemId)}
             onDragLeave={dragLeaveHandler}
             onDragStart={(e)=>dragStartHandler(e, task)}
             onDragEnd={dragEndHandler}

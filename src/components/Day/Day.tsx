@@ -10,27 +10,24 @@ import Item from "../Item";
 interface IProps {
     tasks?: IItem[],
     dragStartHandler: (e: React.DragEvent<HTMLDivElement>, task: IItem) => void,
+    dragOverHanderItem: (e: React.DragEvent<HTMLDivElement>, itemId: string) => void,
     dropOnBoardHandler: (e: React.DragEvent<HTMLDivElement>, day: IDay) => void,
     dragOverHandler: (e: React.DragEvent<HTMLDivElement>)=> void,
     dragLeaveHandler: (e:React.DragEvent<HTMLDivElement>)=>void,
     dayData: IDay
 }
 
-const Day:React.FC<IProps> = memo(({dayData, tasks, dragStartHandler, dropOnBoardHandler, dragOverHandler, dragLeaveHandler})=> {
+const Day:React.FC<IProps> = memo(({dayData, tasks, dragStartHandler, dragOverHanderItem, dropOnBoardHandler, dragOverHandler, dragLeaveHandler})=> {
     const allHolidays = useAppSelector(allSelectors.getAllHolidays);
 
-    const {key, id, number, date } = dayData;
+    const {id, number, date } = dayData;
     const holiday = !!allHolidays[date] ? allHolidays[date] : null;
 
     const dateFromData = new Date(date);
     const currentDate = new Date();
 
-    console.log('day render!')
-
     if(id === 0) {
-        return (
-            <div key={nanoid()} className={`${s.board} ${s.empty_board} `}></div>
-        )
+        return (<div key={nanoid()} className={`${s.board} ${s.empty_board} `}></div>)
     }
 
     return (
@@ -46,22 +43,13 @@ const Day:React.FC<IProps> = memo(({dayData, tasks, dragStartHandler, dropOnBoar
                 {!!holiday && <span>{holiday?.localName}</span>}
             </div>
             <AddInput cardDate={date}/>
-            {!!tasks && 
+            {!!tasks?.length && 
             <div className={s.list_items}>
                 {tasks.map(item=> {
-                    return <Item dragStartHandler={dragStartHandler} key={item.id} itemId={item.id}/>
+                    return <Item dragStartHandler={dragStartHandler} dragOverHanderItem={dragOverHanderItem} key={item.id} itemId={item.id}/>
                 })}
             </div>}
         </div>)
 })
 
 export default Day;
-
-// {!!allTasksIds.length && 
-//     <div className={s.list_items}>
-//         {allTasksIds.map(itemId=> {
-//             if(allTasks[itemId].date === date) {
-//                 return <Item dragStartHandler={dragStartHandler} key={itemId} itemId={itemId}/>
-//             }
-//         })}
-//     </div>}

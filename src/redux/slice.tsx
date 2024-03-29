@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction  } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import  {IState, IItem, IResponse, IMonth} from "../interfaces/interfaces";
+import  {IState, IItem, IResponse} from "../interfaces/interfaces";
 import { HolidayAPI } from "../services/api";
-import { createDaysOfMonth } from "../helpers";
+import { creteYear } from "../helpers";
 
 const holidayAPI = new HolidayAPI();
 
@@ -21,25 +21,6 @@ const initialState: IState = {
     loading: false,
 }
 
-function getDayNum(holiday: string) {
-    const date = new Date(holiday);
-    const holidayDay = date.getDate();
-    return holidayDay;
-}
-
-function creteYear(yearNum: number) {
-    let fullYear: Record<number, IMonth> = {};
-    const ids: number[] = [];
-    for(let i=1; i <= 12; i++) {
-        const yearString = yearNum.toString();
-        const monthString = i.toString().padStart(2, '0');
-        const recordNum = Number(yearString+monthString)
-        fullYear = {...fullYear, [recordNum]: createDaysOfMonth(i, yearNum)}
-        ids.push(recordNum);
-    }
-    return {fullYear, ids};
-}
-
 const calendarSlice = createSlice({
     name: "calendar",
     initialState,
@@ -53,7 +34,6 @@ const calendarSlice = createSlice({
                 state.monthsArray = {...state.monthsArray, ...fullYear};
                 const index1 = state.monthsIds.findIndex((item)=>payload*100 - item < 0)
                 const index2 = state.monthsIds.findIndex((item)=>item - payload*100 > 0)
-                console.log(index2)
                 if(index2 === -1) {
                     state.monthsIds.push(...ids);
                 } else {
@@ -71,7 +51,6 @@ const calendarSlice = createSlice({
             if(state.yearNum !== year) state.yearNum = year;
 
             if(month === 1 ) {
-                console.log('payload 1')
                 if(state.monthsIds.some(item=>Math.round(item/100)=== year - 1)) {return};
                 const {fullYear, ids} = creteYear(state.yearNum-1);
                 state.monthsArray = {...state.monthsArray, ...fullYear};
@@ -79,16 +58,11 @@ const calendarSlice = createSlice({
                 state.monthsIds.splice(index, 0, ...ids);
             }
             if(month === 12 ) {
-                console.log('payload 12')
                 if(state.monthsIds.some(item=>Math.round(item/100)=== year + 1)) {return};
                 const {fullYear, ids} = creteYear(state.yearNum+1);
                 state.monthsArray = {...state.monthsArray, ...fullYear};
                 const index = state.monthsIds.indexOf(state.yearNum*100+12)+1;
                 state.monthsIds.splice(index, 0, ...ids);
-
-                // if(monthsState.some(item=>item.year===state.yearNum+1)) {return}
-                // const index = monthsState.findIndex(item=>item.year === year && item.month === month)
-                // monthsState.splice(index+1, 0, ...creteYear(state.yearNum+1));
             }
         },
         addNewTask: (state, action: PayloadAction<IItem>) => {
@@ -131,6 +105,9 @@ const calendarSlice = createSlice({
         toggleInViewMonth: (state, action:PayloadAction<boolean> ) => {
             state.isCurrentMonthInView = action.payload;
         },
+        changeTaskIds: (state, action: PayloadAction<string[]>) => {
+            state.tasksIds = action.payload;
+        },
     },
     extraReducers:(builder) => {
         builder.addCase(holidayAPI.getPublicHolidays.pending, (state) => {
@@ -157,5 +134,5 @@ const calendarSlice = createSlice({
 
 const reducer = calendarSlice.reducer;
 
-export const {filterByWord, toggleInViewMonth, addNewTask, deleteTask, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
+export const {filterByWord, changeTaskIds, toggleInViewMonth, addNewTask, deleteTask, replaceTask, changeTask, changeYear, changeMonth, filterByLabels } = calendarSlice.actions;
 export default reducer;

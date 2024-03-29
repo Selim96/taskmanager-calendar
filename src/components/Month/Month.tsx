@@ -5,7 +5,7 @@ import s from './Month.module.scss';
 import Day from "../Day";
 import { InView } from "react-intersection-observer";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { changeMonth, replaceTask, toggleInViewMonth } from "../../redux/slice";
+import { changeMonth, changeTaskIds, replaceTask, toggleInViewMonth } from "../../redux/slice";
 import allSelectors from "../../redux/selectors";
 
 interface IProp {
@@ -14,13 +14,17 @@ interface IProp {
 
 const Month:React.FC<IProp> = memo(({monthId}) => {
     const [currentTask, setCurrentTask] = useState<IItem | null>(null);
+    const [onDropItem, setOnDropItem] = useState<string | null>(null)
     const monthData: IMonth = useAppSelector(allSelectors.getMonthArray)[monthId];
     const inViewMonthStatus = useAppSelector(allSelectors.getCurrentMonthInView);
     const currentMonth = useAppSelector(allSelectors.getMonthNum);
     const currentYear = useAppSelector(allSelectors.getYearNum);
     const allTasks = useAppSelector(allSelectors.getTasks);
+    const taskIds = useAppSelector(allSelectors.getTasksIds);
 
-    const {year, month, daysArray, number, id} = monthData;
+    const tasksValues = Object.values(allTasks);
+
+    const {year, month, daysArray, number} = monthData;
 
     const dispatch = useAppDispatch();
 
@@ -28,8 +32,7 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
 
     const scrollToElement = () => {
         if(currentYear.toString()+currentMonth.toString().padStart(2, '0') === number.toString())
-            {scrollToRef?.current?.scrollIntoView({ behavior: 'smooth' });
-            console.log('scroll run')}
+            {scrollToRef?.current?.scrollIntoView({ behavior: 'smooth' });}
       };
 
     const dragStartHandler = useCallback((e: React.DragEvent<HTMLDivElement>, task: IItem): void => {
@@ -46,17 +49,29 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
     const dropOnBoardHandler = useCallback((e:React.DragEvent<HTMLDivElement>, day: IDay) => {
         if(currentTask) {
             const date = day.date;
-            dispatch(replaceTask({id: currentTask.id, date}));
+            if(currentTask.date !== date) {
+                dispatch(replaceTask({id: currentTask.id, date}));
+            } else {
+                const newArray = taskIds.filter(item=>item!==currentTask.id)
+                const index = newArray.findIndex(item=>item===onDropItem);
+                newArray.splice(index, 0, currentTask.id);
+                dispatch(changeTaskIds(newArray))
+            }
             setCurrentTask(null)
         }
         e.currentTarget.style.scale = '1';
         e.currentTarget.style.boxShadow = 'none';
-    }, [dispatch, currentTask])
+    }, [dispatch, currentTask, taskIds, onDropItem])
+
+    const dragOverHanderItem= useCallback((e: React.DragEvent<HTMLDivElement>, itemId: string)=> {
+        e.preventDefault();
+        e.currentTarget.style.boxShadow = '0px 6px 5px 0px rgba(0,0,0,0.56)';
+        setOnDropItem(itemId)
+    },[])
 
     const rowCount = Math.ceil(daysArray.length / 7);
     const currentNumber = Number(currentYear.toString()+currentMonth.toString().padStart(2, '0'));
 
-    const tasksValues = Object.values(allTasks);
 
     useEffect(()=>{
         if(currentNumber === number )
@@ -64,27 +79,24 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
     }, [currentMonth, currentYear])
 
     return (
-        <InView onChange={(inView, entry)=>{console.log('InView', inView); 
-                    if(inView && currentNumber === number) {
-                        console.log('this month InView');
-                        dispatch(toggleInViewMonth(inView))
-                    } 
-                    if(inViewMonthStatus && inView)
-                    dispatch(changeMonth({year: year, month: month}))
+        <InView onChange={(inView, entry)=>{ 
+                    if(inView && currentNumber === number) dispatch(toggleInViewMonth(inView))
+                    if(inViewMonthStatus && inView) dispatch(changeMonth({year: year, month: month}))
                 }} 
-            threshold={0.9}
+            threshold={0.8}
             className="inview_elem">
                     {({ ref, inView }) => 
                     (<Wrapper ref={ref}>
                             <div id={number.toString()} ref={scrollToRef} className={[s.card_list].join(' ')}  style={{gridTemplateRows: `repeat(${rowCount}, minmax(140px, 160px))`}}>
                                 {daysArray.map(day=>{
                                     if(tasksValues.some(item=>item.date === day.date)) {
-                                        const tasks = tasksValues.reduce((total: IItem[],item)=>{
-                                            if(item.date === day.date) {total.push(item)}
+                                        const tasks = taskIds.reduce((total: IItem[],item)=>{
+                                            if(allTasks[item].date === day.date) {total.push(allTasks[item])}
                                             return total;
                                         }, []);
                                         return <Day tasks={tasks} 
                                         dragStartHandler={dragStartHandler} 
+                                        dragOverHanderItem={dragOverHanderItem}
                                         dropOnBoardHandler={dropOnBoardHandler} 
                                         dragOverHandler={dragOverHandler}
                                         dragLeaveHandler={dragLeaveHandler}
@@ -92,6 +104,7 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
                                     }
                                     return <Day 
                                     dragStartHandler={dragStartHandler} 
+                                    dragOverHanderItem={dragOverHanderItem}
                                     dropOnBoardHandler={dropOnBoardHandler} 
                                     dragOverHandler={dragOverHandler}
                                     dragLeaveHandler={dragLeaveHandler}
