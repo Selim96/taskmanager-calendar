@@ -83,7 +83,7 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
                     if(inView && currentNumber === number) dispatch(toggleInViewMonth(inView))
                     if(inViewMonthStatus && inView) dispatch(changeMonth({year: year, month: month}))
                 }} 
-            threshold={0.8}
+            threshold={0.75}
             className="inview_elem">
                     {({ ref, inView }) => 
                     (<Wrapper ref={ref}>
