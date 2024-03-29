@@ -27,19 +27,19 @@
           }
           
           /* Track */
-          &::-webkit-scrollbar-track {
+        &::-webkit-scrollbar-track {
             background: transparent; 
             // border-bottom:1px solid #41414D;
           }
            
           /* Handle */
-          &::-webkit-scrollbar-thumb {
+        &::-webkit-scrollbar-thumb {
             background: #41414D; 
             width: 2px;
           }
           
           /* Handle on hover */
-          &::-webkit-scrollbar-thumb:hover {
+        &::-webkit-scrollbar-thumb:hover {
             background: #555; 
           }
     }
@@ -69,15 +69,15 @@
         z-index: 99;
         width: calc(100% - 26px);
         height: 100%;
-        padding: 0 3px;
+        padding: 2px 6px;
         text-wrap: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         border-radius: 5px;
-        
         transition: background-color 0.5s ease-out, width 1s linear;
         &:hover {
             background-color: var(--item-back-color);
+            min-width: 70%;
             width:auto;
             left: 50%;
             transform: translateX(-50%);
