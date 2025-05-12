@@ -89,7 +89,6 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
     return <header className={s.header}>
         <div className={s.navigation}>
             <div className={s.change_buttons}>
-                
                 <div className={s.button} onClick={decreaseMonth}><KeyboardArrowLeftIcon/></div>
                 <div className={s.button} onClick={increaseMonth}><KeyboardArrowRightIcon /></div>
             </div>

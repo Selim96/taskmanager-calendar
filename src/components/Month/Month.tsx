@@ -80,7 +80,6 @@ const Month:React.FC<IProp> = memo(({monthId}) => {
 
     return (
         <InView onChange={(inView, entry)=>{ 
-                console.log("inview")
                     if(inView && currentNumber === number) dispatch(toggleInViewMonth(inView))
                     if(inViewMonthStatus && inView) dispatch(changeMonth({year: year, month: month}))
                 }} 
