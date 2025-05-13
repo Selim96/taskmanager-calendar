@@ -1,1 +1,1 @@
-export {default} from './TodayBtn.jsx';
+export {default} from './TodayBtn.tsx';

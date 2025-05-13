@@ -8,6 +8,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import allSelectors from '../../redux/selectors';
 import Filter from '../Filter';
+import TodayBtn from '../TodayBtn';
 
 interface IProp {
     canvasRef: React.RefObject<HTMLDivElement>
@@ -115,7 +116,7 @@ const Header: React.FC<IProp> = memo(({canvasRef}) => {
         </div>
         
         <div className={s.interfaces}>
-            
+            <TodayBtn monthNum={currentMonthIndex} yearNum={currentYear}/>
             <Download/> 
         </div>
     </header>
